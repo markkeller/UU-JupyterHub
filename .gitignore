@@ -1,0 +1,6 @@
+.env
+.git/
+jupyterhub_config.py
+secrets/*
+userlist
+images/nginx-redirect/default.conf

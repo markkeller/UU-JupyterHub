@@ -1,0 +1,111 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+# JupyterHub docker-compose configuration file
+version: "2"
+#env_file: .env
+
+services:
+  hub:
+    build:
+      context: .
+      dockerfile: Dockerfile.jupyterhub
+    image: jupyterhub
+    container_name: jupyterhub
+    volumes:
+      # Bind Docker binary from host machine so we can invoke Docker commands
+      # from inside container
+      - "/usr/local/bin/docker:/usr/local/bin/docker:ro"
+      # Bind Docker socket on the host so we can connect to the daemon from
+      # within the container
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
+      # Bind Docker volume on host for JupyterHub database and cookie secrets
+      - "data:${DATA_VOLUME_CONTAINER}"
+    ports:
+      - "443:443"
+    environment:
+      # All containers will join this network
+      DOCKER_NETWORK_NAME: ${DOCKER_NETWORK_NAME}
+      # JupyterHub will spawn this Notebook image for users
+      DOCKER_NOTEBOOK_IMAGE: ${DOCKER_NOTEBOOK_IMAGE}
+      # Notebook directory inside user image
+      DOCKER_NOTEBOOK_DIR: ${DOCKER_NOTEBOOK_DIR}
+      # Using this run command (optional)
+      DOCKER_SPAWN_CMD: ${DOCKER_SPAWN_CMD}
+      # Required to authenticate users using GitHub OAuth
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      OAUTH_CALLBACK_URL: ${OAUTH_CALLBACK_URL}
+      # Logo file path
+      JUPYTERHUB_LOGO: ${JUPYTERHUB_LOGO}
+    command: > 
+      jupyterhub -f /srv/jupyterhub/jupyterhub_config.py
+  mysolr:
+    image: solr:latest
+    container_name: mysolr
+    hostname: mysolr
+    domainname: localdomain
+    #cpu_shares: 64 
+    mem_limit: 4G
+  mynlp:
+    image: motiz88/corenlp
+    container_name: mynlp
+    #cpu_shares: 64
+    mem_limit: 4G
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYROOTPW}
+      - MYSQL_DATABASE=mimic2
+    volumes:
+      - /srv/jupyterhub/mysql/var:/var/lib/mysql:rw
+      - /srv/jupyterhub/mysql/root:/root:ro
+    #cpu_shares: 64
+    mem_limit: 4G
+  mymongo:
+    image: mongo:latest
+    container_name: mymongo
+    volumes:
+      - /srv/jupyterhub/mongo:/data/db:rw
+    #cpu_shares: 64
+    mem_limit: 4G
+  myorient:
+    image: orientdb:latest
+    container_name: myorient
+    environment:
+      - ORIENTDB_ROOT_PASSWORD=${ORIENTROOTPW}
+    volumes:
+      - /srv/jupyterhub/orientdb:/orientdb/databases:rw
+    #cpu_shares: 64
+    mem_limit: 4G
+  remotedata:
+    build: ./images/web-server
+    container_name: mynginx
+    #cpu_shares: 16
+    mem_limit: 256M
+  sshserver:
+    build: ./images/ssh-server
+    container_name: myssh
+    environment:
+        - AUTH_MECHANISM=simpleAuth
+        - AUTH_USER=${SSHUSER}
+        - AUTH_PASSWORD=${SSHPW}
+        - HTTP_ENABLED=false
+    #cpu_shares: 16
+    mem_limit: 256M
+  nginx-redirect:
+    build: ./images/nginx-redirect
+    container_name: http_to_https
+    mem_limit: 256M
+
+volumes:
+  data:
+    external:
+      name: ${DATA_VOLUME_HOST}
+
+networks:
+  default:
+    external:
+      name: ${DOCKER_NETWORK_NAME}
+
