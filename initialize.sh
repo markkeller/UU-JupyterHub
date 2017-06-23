@@ -95,8 +95,8 @@ we will want to redirect all HTTP traffic to HTTPS.
 What is the ${YELLOW}fully qualified domain name (FQDN)${NC} of this server?
 It should match your GitHub callback url:  https://${YELLOW}<FQDN>${NC}/hub/oauth_callback"
 read fqdn
-cp default.clean ./nginx-redirect/default.conf
-sed -i "s/#server_name/server_name\t$fqdn/" ./nginx-redirect/default.conf
+cp default.clean ./images/nginx-redirect/default.conf
+sed -i "s/#server_name/server_name\t$fqdn/" ./images/nginx-redirect/default.conf
 
 echo -e "\nWe will now need to choose a password for the root user on the
 database containers.
