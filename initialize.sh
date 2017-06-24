@@ -144,4 +144,6 @@ echo -e "${YELLOW}Installation of the JupyterHub environment is complete. You sh
 to the FQDN of the server, log in using your GitHub credentials, and test things out.  
 Assuming everything looks good, you should not run this script again.  Instead 
 start the containers by navigating to this directory and execute docker-compose up -d
-to get everything running again should you need to reboot.
+to get everything running again should you need to reboot."
+
+exit
