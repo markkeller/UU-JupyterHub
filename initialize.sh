@@ -78,7 +78,7 @@ select yn in "Yes" "No"; do
 				echo -e "${RED}The path provided is invalid.${NC}"
 			else
 				sed -i "s@LOGO_PATH=@LOGO_PATH=$logopath@" ./.env
-				jhubpath=/srv/jupyterhub/$(echo $testing | awk -F/ '{ print $NF }')
+				jhubpath=/srv/jupyterhub/$(echo $logopath | awk -F/ '{ print $NF }')
 				sed -i "s@JUPYTERHUB_LOGO=@JUPYTERHUB_LOGO=$jhubpath@" ./.env
 				sed -i 's/#c.JupyterHub.logo/c.JupyterHub.logo/' jupyterhub_config.py
 				let COUNTER=$COUNTER+1

@@ -10,6 +10,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.jupyterhub
+      args:
+        logopath: ${LOGO_PATH}
     image: jupyterhub
     container_name: jupyterhub
     volumes:
