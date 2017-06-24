@@ -55,7 +55,7 @@ services:
     #cpu_shares: 64
     mem_limit: 4G
   mysql:
-    image: mysql:latest
+    image: markkeller/mysql:mimic2
     container_name: mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${MYROOTPW}

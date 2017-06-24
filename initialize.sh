@@ -6,6 +6,7 @@ RED='\e[41m'
 
 cp .env.clean .env
 cp jupyterhub_config.py.clean jupyterhub_config.py
+cp Dockerfile.jupyterhub.clean Dockerfile.jupyterhub
 
 echo -e "${YELLOW}This script was created to guide you in instantiating a one server, Docker-
 based JupyterHub environment in support of data science classes being 
@@ -80,6 +81,7 @@ select yn in "Yes" "No"; do
 				sed -i "s@LOGO_PATH=@LOGO_PATH=$logopath@" ./.env
 				jhubpath=/srv/jupyterhub/$(echo $logopath | awk -F/ '{ print $NF }')
 				sed -i "s@JUPYTERHUB_LOGO=@JUPYTERHUB_LOGO=$jhubpath@" ./.env
+				echo "COPY $logopath $jhubpath" >> Dockerfile.jupyterhub
 				sed -i 's/#c.JupyterHub.logo/c.JupyterHub.logo/' jupyterhub_config.py
 				let COUNTER=$COUNTER+1
 			fi
@@ -144,6 +146,6 @@ echo -e "${YELLOW}Installation of the JupyterHub environment is complete. You sh
 to the FQDN of the server, log in using your GitHub credentials, and test things out.  
 Assuming everything looks good, you should not run this script again.  Instead 
 start the containers by navigating to this directory and execute docker-compose up -d
-to get everything running again should you need to reboot."
+to get everything running again should you need to reboot.${NC}"
 
 exit
