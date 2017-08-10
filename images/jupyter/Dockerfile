@@ -18,7 +18,9 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
       libxrender-dev \
       libfontconfig-dev \
       libffi-dev \
-      mongodb-clients \ 
+      rsync \
+      mongodb-clients \
+      libmariadb-client-lgpl-dev \
   && rm -rf /var/lib/apt/lists/*
 
 
@@ -76,11 +78,15 @@ RUN pip install pydicom \
     radnlp \
     fhirclient \
     pivottablejs \
-    girder_client
+    girder_client \
+    nose \
+    pyorient
 
+RUN R -e 'install.packages(c("tidyverse","tidytext","icd","RMySQL","DBI","dbplyr","SuperLearner","caret","tensorflow","ggdendro","tree"), dependencies = TRUE, repos = "https://cran.cnr.berkeley.edu/" )'
 
 WORKDIR /home/jovyan
+ADD decart_welcome.ipynb /home/jovyan/work/decart_welcome.ipynb
+ADD media /home/jovyan/work/media
 
 # RUN nbstripout --install
-# "missing" unix commands less, tree
 CMD ["start-notebook.sh"]
