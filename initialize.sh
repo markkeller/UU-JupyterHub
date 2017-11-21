@@ -140,7 +140,12 @@ docker exec -it mysql mysql -uroot -p$mysqlroot -e "grant select on mimic2.* to 
 docker exec -it mysql mysql -uroot -p$mysqlroot -e "source /root/mimic2dead.sql" mimic2
 
 docker commit $(docker ps | grep mysql | awk '{ print $1 }') markkeller/mysql:mimic2
+
+docker stop mysql
+docker rm mysql
+
 sed -i 's@mysql:latest@markkeller/mysql:mimic2@' docker-compose.yml
+docker-compose up -d
 
 echo -e "${YELLOW}Installation of the JupyterHub environment is complete. You should now navigate your browser 
 to the FQDN of the server, log in using your GitHub credentials, and test things out.  
