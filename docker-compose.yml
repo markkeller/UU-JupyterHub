@@ -1,19 +1,13 @@
-# Copyright (c) Jupyter Development Team.
-# Distributed under the terms of the Modified BSD License.
-
 # JupyterHub docker-compose configuration file
 version: "2"
-#env_file: .env
 
 services:
   hub:
     build:
       context: .
       dockerfile: Dockerfile.jupyterhub
-      args:
-        logopath: ${LOGO_PATH}
     image: jupyterhub
-    container_name: jupyterhub
+    container_name: my_jupyterhub
     volumes:
       # Bind Docker binary from host machine so we can invoke Docker commands
       # from inside container
@@ -23,8 +17,6 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:rw"
       # Bind Docker volume on host for JupyterHub database and cookie secrets
       - "data:${DATA_VOLUME_CONTAINER}"
-    ports:
-      - "443:443"
     environment:
       # All containers will join this network
       DOCKER_NETWORK_NAME: ${DOCKER_NETWORK_NAME}
@@ -44,19 +36,19 @@ services:
       jupyterhub -f /srv/jupyterhub/jupyterhub_config.py
   mysolr:
     image: solr:latest
-    container_name: mysolr
+    container_name: my_solr
     hostname: mysolr
     domainname: localdomain
     #cpu_shares: 64 
     mem_limit: 4G
   mynlp:
     image: motiz88/corenlp
-    container_name: mynlp
+    container_name: my_nlp
     #cpu_shares: 64
     mem_limit: 4G
   mysql:
     image: mysql:latest
-    container_name: mysql
+    container_name: my_mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${MYROOTPW}
       - MYSQL_DATABASE=mimic2
@@ -67,14 +59,14 @@ services:
     mem_limit: 4G
   mymongo:
     image: mongo:latest
-    container_name: mymongo
+    container_name: my_mongo
     volumes:
       - /srv/jupyterhub/mongo:/data/db:rw
     #cpu_shares: 64
     mem_limit: 4G
   myorient:
     image: orientdb:latest
-    container_name: myorient
+    container_name: my_orient
     environment:
       - ORIENTDB_ROOT_PASSWORD=${ORIENTROOTPW}
     volumes:
@@ -83,12 +75,12 @@ services:
     mem_limit: 4G
   remotedata:
     build: ./images/web-server
-    container_name: mynginx
+    container_name: my_web
     #cpu_shares: 16
     mem_limit: 256M
   sshserver:
     build: ./images/ssh-server
-    container_name: myssh
+    container_name: my_ssh
     environment:
         - AUTH_MECHANISM=simpleAuth
         - AUTH_USER=${SSHUSER}
@@ -98,10 +90,11 @@ services:
     mem_limit: 256M
   nginx-redirect:
     build: ./images/nginx-redirect
-    container_name: http_to_https
+    container_name: my_proxy
     mem_limit: 256M
     ports:
       - "80:80"
+	  - "443:443"
 
 volumes:
   data:

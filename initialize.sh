@@ -4,6 +4,12 @@ YELLOW='\e[33m'
 NC='\e[0m'
 RED='\e[41m'
 
+user="$(id -un 2>/dev/null || true)"
+if [ "$user" != 'root']
+	echo "This script must be run as the root user.  Please re-run it with sudo."
+	exit 1
+fi
+
 cp .env.clean .env
 cp jupyterhub_config.py.clean jupyterhub_config.py
 cp Dockerfile.jupyterhub.clean Dockerfile.jupyterhub
@@ -16,7 +22,58 @@ notebook servers, MySQL, MongoDB, OrientDB CoreNLP, Nginx, and SSH servers
 
 Let's begin!${NC}
 
-First, let's setup a few things for our JupyterHub server.  This script
+if [ ! -f /usr/bin/docker ]; then
+	echo -e "\nDocker does not appear to be installed on this computer.  Would you 
+	like this script to install it on your behalf?"
+	select yn in "Yes" "No"; do
+		case $yn in
+			Yes )	echo -e "\nNow installing Docker..."
+				curl -fsSL get.docker.com -o get-docker.sh
+				chmod u+x get-docker.sh && sh get-docker.sh
+				success=$?
+				if [ $success -ne 0]
+					echo -e "\nThe Docker installation has failed.  Please check the output above for 
+					clues as to why.\nIf you wouldd like to install Docker manually, more information 
+					can be found here:\n\thttps://docs.docker.com/engine/installation/"
+					exit 1
+				else
+					echo -e "\nDocker was successfully installed!"
+				fi
+				break;;
+			No )	echo -e "\nDocker is required for this script to run.  Come back again if you 
+					change your mind.  Bye!"
+				exit 1;;
+			* )		echo -e "\nInvalid choice.  Please select one of the options below."
+				continue;;
+		esac
+	done
+else if [ ! -f /usr/local/bin/docker-compose] ]; then
+	echo -e "\nDocker Compose does not appear to be installed on this computer.  Would you 
+	like this script to install it on your behalf?"
+	select yn in "Yes" "No"; do
+		case $yn in
+			Yes )	echo -e "\nNow installing Docker Compose..."
+				sudo curl -L https://github.com/docker/compose/releases/download/1.17.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+				success=$?
+				if [ $success -ne 0]
+					echo -e "\nThe Docker Compose installation has failed.  Please check the output above for 
+					clues as to why.\nIf you wouldd like to install Docker Compose manually, more information 
+					can be found here:\n\thttps://docs.docker.com/compose/install/"
+					exit 1
+				else
+					echo -e "\nDocker Compose was successfully installed!"
+				fi
+				break;;
+			No )	echo -e "\nDocker Compose is required for this script to run.  Come back again if you 
+					change your mind.  Bye!"
+				exit 1;;
+			* )		echo -e "\nInvalid choice.  Please select one of the options below."
+				continue;;
+		esac
+	done
+fi
+
+Let's setup a few things for our JupyterHub server.  This script
 was set up on the assumption that GitHub OAuth would be used as the 
 authenticator.  You will first need to create an OAuth application within
 your GitHub account (https://github.com/settings/applications/new).
@@ -87,7 +144,8 @@ select yn in "Yes" "No"; do
 			fi
 			done
 			break;;
-		No )	break;;
+		No )	sed -i "s@LOGO_PATH=@@;s@JUPYTERHUB_LOGO=@@" ./.env
+			break;;
 	esac
 done
 
