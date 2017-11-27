@@ -30,7 +30,7 @@ if [ ! -f /usr/bin/docker ]; then
 				curl -fsSL get.docker.com -o get-docker.sh
 				chmod u+x get-docker.sh && sh get-docker.sh
 				success=$?
-				if [ $success -ne 0]; then
+				if [ $success -ne 0 ]; then
 					echo -e "\nThe Docker installation has failed.  Please check the output above for clues as to why.\nIf you wouldd like to install Docker manually, more information can be found here:\n\thttps://docs.docker.com/engine/installation/"
 					exit 1
 				else
@@ -43,7 +43,9 @@ if [ ! -f /usr/bin/docker ]; then
 				continue;;
 		esac
 	done
-elif [ ! -f /usr/local/bin/docker-compose ]; then
+fi
+
+if [ ! -f /usr/local/bin/docker-compose ]; then
 	echo -e "\nDocker Compose does not appear to be installed on this computer.  Would you like this script to install it on your behalf?"
 	select yn in "Yes" "No"; do
 		case $yn in
