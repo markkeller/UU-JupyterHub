@@ -5,7 +5,7 @@ NC='\e[0m'
 RED='\e[41m'
 
 user="$(id -un 2>/dev/null || true)"
-if [ "$user" != 'root']
+if [ "$user" != 'root' ]; then
 	echo "This script must be run as the root user.  Please re-run it with sudo."
 	exit 1
 fi
@@ -20,7 +20,7 @@ taught by the Biomedical Informatics department at the University of Utah.
 It will setup and configure JupyterHub, the users' Jupyter/IPython 
 notebook servers, MySQL, MongoDB, OrientDB CoreNLP, Nginx, and SSH servers
 
-Let's begin!${NC}
+Let's begin!${NC}"
 
 if [ ! -f /usr/bin/docker ]; then
 	echo -e "\nDocker does not appear to be installed on this computer.  Would you 
@@ -31,7 +31,7 @@ if [ ! -f /usr/bin/docker ]; then
 				curl -fsSL get.docker.com -o get-docker.sh
 				chmod u+x get-docker.sh && sh get-docker.sh
 				success=$?
-				if [ $success -ne 0]
+				if [ $success -ne 0]; then
 					echo -e "\nThe Docker installation has failed.  Please check the output above for 
 					clues as to why.\nIf you wouldd like to install Docker manually, more information 
 					can be found here:\n\thttps://docs.docker.com/engine/installation/"
@@ -47,7 +47,7 @@ if [ ! -f /usr/bin/docker ]; then
 				continue;;
 		esac
 	done
-else if [ ! -f /usr/local/bin/docker-compose] ]; then
+elif [ ! -f /usr/local/bin/docker-compose ]; then
 	echo -e "\nDocker Compose does not appear to be installed on this computer.  Would you 
 	like this script to install it on your behalf?"
 	select yn in "Yes" "No"; do
@@ -55,7 +55,7 @@ else if [ ! -f /usr/local/bin/docker-compose] ]; then
 			Yes )	echo -e "\nNow installing Docker Compose..."
 				sudo curl -L https://github.com/docker/compose/releases/download/1.17.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
 				success=$?
-				if [ $success -ne 0]
+				if [ $success -ne 0]; then
 					echo -e "\nThe Docker Compose installation has failed.  Please check the output above for 
 					clues as to why.\nIf you wouldd like to install Docker Compose manually, more information 
 					can be found here:\n\thttps://docs.docker.com/compose/install/"
@@ -73,7 +73,7 @@ else if [ ! -f /usr/local/bin/docker-compose] ]; then
 	done
 fi
 
-Let's setup a few things for our JupyterHub server.  This script
+echo -e "Let's setup a few things for our JupyterHub server.  This script
 was set up on the assumption that GitHub OAuth would be used as the 
 authenticator.  You will first need to create an OAuth application within
 your GitHub account (https://github.com/settings/applications/new).
@@ -91,7 +91,7 @@ sed -i "s/GITHUB_CLIENT_ID=/GITHUB_CLIENT_ID=$oauth_client_id/" ./.env
 sed -i "s/GITHUB_CLIENT_SECRET=/GITHUB_CLIENT_SECRET=$oauth_client_secret/" ./.env
 sed -i "s@OAUTH_CALLBACK_URL=@OAUTH_CALLBACK_URL=$oauth_callback@" ./.env
 
-echo -e "\nYou'll need to have created a key/certificate pair in order to allow
+echo -e "\nYou will need to have created a key/certificate pair in order to allow
 users to use JupyterHub securely."
 
 COUNTER=0
