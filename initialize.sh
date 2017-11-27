@@ -23,8 +23,7 @@ notebook servers, MySQL, MongoDB, OrientDB CoreNLP, Nginx, and SSH servers
 Let's begin!${NC}"
 
 if [ ! -f /usr/bin/docker ]; then
-	echo -e "\nDocker does not appear to be installed on this computer.  Would you 
-	like this script to install it on your behalf?"
+	echo -e "\nDocker does not appear to be installed on this computer.  Would you like this script to install it on your behalf?"
 	select yn in "Yes" "No"; do
 		case $yn in
 			Yes )	echo -e "\nNow installing Docker..."
@@ -32,42 +31,35 @@ if [ ! -f /usr/bin/docker ]; then
 				chmod u+x get-docker.sh && sh get-docker.sh
 				success=$?
 				if [ $success -ne 0]; then
-					echo -e "\nThe Docker installation has failed.  Please check the output above for 
-					clues as to why.\nIf you wouldd like to install Docker manually, more information 
-					can be found here:\n\thttps://docs.docker.com/engine/installation/"
+					echo -e "\nThe Docker installation has failed.  Please check the output above for clues as to why.\nIf you wouldd like to install Docker manually, more information can be found here:\n\thttps://docs.docker.com/engine/installation/"
 					exit 1
 				else
 					echo -e "\nDocker was successfully installed!"
 				fi
 				break;;
-			No )	echo -e "\nDocker is required for this script to run.  Come back again if you 
-					change your mind.  Bye!"
+			No )	echo -e "\nDocker is required for this script to run.  Come back again if you change your mind.  Bye!"
 				exit 1;;
-			* )		echo -e "\nInvalid choice.  Please select one of the options below."
+			* )		echo -e "\nInvalid choice.  Please select one of the options above."
 				continue;;
 		esac
 	done
 elif [ ! -f /usr/local/bin/docker-compose ]; then
-	echo -e "\nDocker Compose does not appear to be installed on this computer.  Would you 
-	like this script to install it on your behalf?"
+	echo -e "\nDocker Compose does not appear to be installed on this computer.  Would you like this script to install it on your behalf?"
 	select yn in "Yes" "No"; do
 		case $yn in
 			Yes )	echo -e "\nNow installing Docker Compose..."
 				sudo curl -L https://github.com/docker/compose/releases/download/1.17.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
 				success=$?
 				if [ $success -ne 0]; then
-					echo -e "\nThe Docker Compose installation has failed.  Please check the output above for 
-					clues as to why.\nIf you wouldd like to install Docker Compose manually, more information 
-					can be found here:\n\thttps://docs.docker.com/compose/install/"
+					echo -e "\nThe Docker Compose installation has failed.  Please check the output above for clues as to why.\nIf you wouldd like to install Docker Compose manually, more information can be found here:\n\thttps://docs.docker.com/compose/install/"
 					exit 1
 				else
 					echo -e "\nDocker Compose was successfully installed!"
 				fi
 				break;;
-			No )	echo -e "\nDocker Compose is required for this script to run.  Come back again if you 
-					change your mind.  Bye!"
+			No )	echo -e "\nDocker Compose is required for this script to run.  Come back again if you change your mind.  Bye!"
 				exit 1;;
-			* )		echo -e "\nInvalid choice.  Please select one of the options below."
+			* )		echo -e "\nInvalid choice.  Please select one of the options above."
 				continue;;
 		esac
 	done
@@ -91,32 +83,56 @@ sed -i "s/GITHUB_CLIENT_ID=/GITHUB_CLIENT_ID=$oauth_client_id/" ./.env
 sed -i "s/GITHUB_CLIENT_SECRET=/GITHUB_CLIENT_SECRET=$oauth_client_secret/" ./.env
 sed -i "s@OAUTH_CALLBACK_URL=@OAUTH_CALLBACK_URL=$oauth_callback@" ./.env
 
+if [ ! -f ./images/proxy/ssl ]; then
+	mkdir ./images/proxy/ssl
+fi
+
 echo -e "\nYou will need to have created a key/certificate pair in order to allow
-users to use JupyterHub securely."
+users to use JupyterHub securely.\n\nDo you:"
 
-COUNTER=0
-while [ $COUNTER -eq 0 ]; do
-echo -e "\nWhat is the path to the ${YELLOW}SSL key${NC}?"
-read -e sslkey
-if [ ! -f "$sslkey" ]; then
-	echo -e "\n${RED}The path provided is invalid.${NC}"
-else
-	cp $sslkey ./secrets/jupyterhub.key
-	let COUNTER=$COUNTER+1
-fi
+select wherecert in "Have some already?" "Want to make a self-signed cert/key?" "Need to exit and have some made?"; do
+case $wherecert in
+	"Have some already?" )
+		COUNTER=0
+		while [ $COUNTER -eq 0 ]; do
+		echo -e "\nWhat is the path to the ${YELLOW}SSL key${NC}?"
+		read -e sslkey
+		if [ ! -f "$sslkey" ]; then
+			echo -e "\n${RED}The path provided is invalid.${NC}"
+		else
+			cp $sslkey ./images/proxy/ssl/server.key
+			let COUNTER=$COUNTER+1
+		fi
+		done
+
+		COUNTER=0
+		while [ $COUNTER -eq 0 ]; do
+		echo -e "\nWhat is the path to the ${YELLOW}certificate${NC}?"
+		read -e sslcert
+		if [ ! -f "$sslcert" ]; then
+			echo -e "\n${RED}The path provided is invalid.${NC}"
+		else
+			cp $sslcert ./images/proxy/ssl/server.crt
+			let COUNTER=$COUNTER+1
+		fi
+		done
+		break;;
+	"Want to make a self-signed cert/key?" )
+		openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./images/proxy/ssl/server.key -out ./images/proxy/ssl/server.crt
+		if [ ! -f ./images/proxy/ssl/server.key ] || [ ! -f ./images/proxy/ssl/server.crt ]; then
+			echo -e "\nCertificate generation seems to have failed.  Please try creating your own key pair.  Exiting."
+			exit 1
+		fi
+		break;;
+	"Need to exit and have some made?" )	
+		echo -e "\nOkey dokey.  See you soon."
+		exit 1;;
+	* )
+		echo -e "\nInvalid choice.  Please select one of the options above."
+		continue;;
+esac
 done
 
-COUNTER=0
-while [ $COUNTER -eq 0 ]; do
-echo -e "\nWhat is the path to the ${YELLOW}certificate${NC}?"
-read -e sslcert
-if [ ! -f "$sslcert" ]; then
-	echo -e "\n${RED}The path provided is invalid.${NC}"
-else
-	cp $sslcert ./secrets/jupyterhub.crt
-	let COUNTER=$COUNTER+1
-fi
-done
 
 echo -e "\nJupyterHub will require at least one user to administer usage of the system.
 
@@ -146,6 +162,9 @@ select yn in "Yes" "No"; do
 			break;;
 		No )	sed -i "s@LOGO_PATH=@@;s@JUPYTERHUB_LOGO=@@" ./.env
 			break;;
+		* )
+			echo -e "\nInvalid choice.  Please select one of the options above."
+			continue;;
 	esac
 done
 
