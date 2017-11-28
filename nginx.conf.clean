@@ -30,16 +30,16 @@ http {
     include /etc/nginx/conf.d/*.conf;
 
     server {
-        listen          80;
-        server_name		turmeric3.med.utah.edu
-        return          302 https://$host$request_uri;
+        listen 80;
+        server_name srv_name;
+        return 302 https://$host$request_uri;
     }
 
     server {
         listen 443;
         client_max_body_size 50M;
 
-        server_name turmeric3.med.utah.edu;
+        server_name srv_name;
 
         ssl on;
         include /etc/nginx/ssl.conf;

@@ -1,6 +1,8 @@
-.env
 .git/
+.env
 jupyterhub_config.py
-secrets/*
+Dockerfile.jupyterhub
 userlist
-images/nginx-redirect/default.conf
+images/proxy/nginx.conf
+images/proxy/ssl/*
+get-docker.sh

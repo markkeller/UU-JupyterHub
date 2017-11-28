@@ -52,7 +52,7 @@ if [ ! -f /usr/local/bin/docker-compose ]; then
 			Yes )	echo -e "\nNow installing Docker Compose..."
 				sudo curl -L https://github.com/docker/compose/releases/download/1.17.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
 				success=$?
-				if [ $success -ne 0]; then
+				if [ $success -ne 0 ]; then
 					echo -e "\nThe Docker Compose installation has failed.  Please check the output above for clues as to why.\nIf you wouldd like to install Docker Compose manually, more information can be found here:\n\thttps://docs.docker.com/compose/install/"
 					exit 1
 				else
@@ -85,9 +85,18 @@ sed -i "s/GITHUB_CLIENT_ID=/GITHUB_CLIENT_ID=$oauth_client_id/" ./.env
 sed -i "s/GITHUB_CLIENT_SECRET=/GITHUB_CLIENT_SECRET=$oauth_client_secret/" ./.env
 sed -i "s@OAUTH_CALLBACK_URL=@OAUTH_CALLBACK_URL=$oauth_callback@" ./.env
 
-if [ ! -f ./images/proxy/ssl ]; then
+if [ ! -d ./images/proxy/ssl ]; then
 	mkdir ./images/proxy/ssl
 fi
+
+echo -e "As JupyterHub will be listening on port 443 for TLS-encrypted connections, 
+we will want to redirect all HTTP traffic to HTTPS.
+
+What is the ${YELLOW}fully qualified domain name (FQDN)${NC} of this server?
+It should match your GitHub callback url:  https://${YELLOW}<FQDN>${NC}/hub/oauth_callback"
+read fqdn
+cp ./nginx.conf.clean ./images/proxy/nginx.conf
+sed -i "s/srv_name/$fqdn/g" ./images/proxy/nginx.conf
 
 echo -e "\nYou will need to have created a key/certificate pair in order to allow
 users to use JupyterHub securely.\n\nDo you:"
@@ -135,6 +144,10 @@ case $wherecert in
 esac
 done
 
+if [ ! -f ./images/proxy/ssl/dhparam.pem ]; then
+	echo -e "\n\nWe're now going to generate Diffie-Hellman parameters in order to improve SSL connection security through forward secrecy.  This can take a while.  Hold tight..."
+	openssl dhparam -out ./images/proxy/ssl/dhparam.pem 4096
+fi
 
 echo -e "\nJupyterHub will require at least one user to administer usage of the system.
 
@@ -170,15 +183,6 @@ select yn in "Yes" "No"; do
 	esac
 done
 
-echo -e "As JupyterHub will be listening on port 443 for TLS-encrypted connections, 
-we will want to redirect all HTTP traffic to HTTPS.
-
-What is the ${YELLOW}fully qualified domain name (FQDN)${NC} of this server?
-It should match your GitHub callback url:  https://${YELLOW}<FQDN>${NC}/hub/oauth_callback"
-read fqdn
-cp default.clean ./images/nginx-redirect/default.conf
-sed -i "s/#server_name/server_name\t$fqdn/" ./images/nginx-redirect/default.conf
-
 echo -e "\nWe will now need to choose a password for the root user on the
 database containers.
 
@@ -211,22 +215,24 @@ wget -O - https://physionet.org/mimic2/demo/mimic2dead.sql.gz | gunzip -c > /srv
 docker network create jupyterhub-network
 docker volume create --name jupyterhub-data
 
-docker build -f ./images/jupyter/Dockerfile -t markkeller/datascience-notebook .
+docker build -f ./images/jupyter/Dockerfile -t uujupyterhub_datascience-notebook .
 docker-compose up -d
 
 sleep 10s
-docker exec -it mysql mysql -uroot -p$mysqlroot -e "grant select on mimic2.* to 'jovyan'@'%' identified by 'jovyan';" mimic2
-docker exec -it mysql mysql -uroot -p$mysqlroot -e "source /root/mimic2dead.sql" mimic2
 
-docker commit $(docker ps | grep mysql | awk '{ print $1 }') markkeller/mysql:mimic2
+docker exec -it my_mysql mysql -uroot -p$mysqlroot -e "grant select on mimic2.* to 'jovyan'@'%' identified by 'jovyan';" mimic2
+echo -e "\n${YELLOW}Now importing Mimic2 dataset into MySQL container.  This will take a long time.  Bear with us.${NC}"
+docker exec -it my_mysql mysql -uroot -p$mysqlroot -e "source /root/mimic2dead.sql" mimic2
 
-docker stop mysql
-docker rm mysql
+docker commit $(docker ps | grep mysql | awk '{ print $1 }') uujupyterhub_mysql
 
-sed -i 's@mysql:latest@markkeller/mysql:mimic2@' docker-compose.yml
+docker stop my_mysql
+docker rm my_mysql
+
+sed -i 's@mysql:latest@uujupyterhub_mysql@' docker-compose.yml
 docker-compose up -d
 
-echo -e "${YELLOW}Installation of the JupyterHub environment is complete. You should now navigate your browser 
+echo -e "\n${YELLOW}Installation of the JupyterHub environment is complete. You should now navigate your browser 
 to the FQDN of the server, log in using your GitHub credentials, and test things out.  
 Assuming everything looks good, you should not run this script again.  Instead 
 start the containers by navigating to this directory and execute docker-compose up -d

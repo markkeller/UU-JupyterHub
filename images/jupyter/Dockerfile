@@ -1,5 +1,4 @@
-FROM jupyter/datascience-notebook:11be019e4079
-MAINTAINER chapmanbe <brian.chapman@utah.edu>
+FROM jupyter/datascience-notebook:e89b2fe9974b
 USER root
 # for physionet instructions see
 # https://www.physionet.org/physiotools/wfdb-linux-quick-start.shtml
@@ -13,7 +12,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y \
       gcc \
       libcurl4-openssl-dev \
       libexpat1-dev \
-      libnetcdff5 \
+      libnetcdf11 \
       locales-all \
       libxrender-dev \
       libfontconfig-dev \
@@ -82,11 +81,12 @@ RUN pip install pydicom \
     nose \
     pyorient
 
-RUN R -e 'install.packages(c("tidyverse","tidytext","icd","RMySQL","DBI","dbplyr","SuperLearner","caret","tensorflow","ggdendro","tree"), dependencies = TRUE, repos = "https://cran.cnr.berkeley.edu/" )'
+RUN R -e 'install.packages(c("tidyverse","tidytext","icd","RMySQL","DBI","dbplyr","SuperLearner","caret","tensorflow","ggdendro","tree","stringi"), dependencies = TRUE, repos = "https://cran.cnr.berkeley.edu/" )'
 
 WORKDIR /home/jovyan
-ADD decart_welcome.ipynb /home/jovyan/work/decart_welcome.ipynb
-ADD media /home/jovyan/work/media
+
+ADD ./images/jupyter/decart_welcome.ipynb /home/jovyan/work/decart_welcome.ipynb
+ADD ./images/jupyter/media /home/jovyan/work/media
 
 # RUN nbstripout --install
 CMD ["start-notebook.sh"]

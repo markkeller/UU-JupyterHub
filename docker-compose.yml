@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.jupyterhub
-    image: jupyterhub
+    image: uujupyterhub
     container_name: my_jupyterhub
     volumes:
       # Bind Docker binary from host machine so we can invoke Docker commands
@@ -88,13 +88,13 @@ services:
         - HTTP_ENABLED=false
     #cpu_shares: 16
     mem_limit: 256M
-  nginx-redirect:
-    build: ./images/nginx-redirect
+  proxy:
+    build: ./images/proxy
     container_name: my_proxy
     mem_limit: 256M
     ports:
       - "80:80"
-	  - "443:443"
+      - "443:443"
 
 volumes:
   data:
