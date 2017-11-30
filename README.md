@@ -2,7 +2,7 @@
 This repository is a fork of [jupyterhub-deploy-docker](https://github.com/jupyterhub/jupyterhub-deploy-docker) for use at the 
 University of Utah. We have made customizations to include containers of 
 other popular data tools (MySQL, MongoDB, OrientDB, CoreNLP, Solr), web,
-and ssh servers for use in educating students in data science curriculum.
+and ssh servers for use in educating students in a data science curriculum.
 
 This repository also includes a bash script (initialize.sh) which will help 
 users configure their deployment.  To use it, after cloning the repository 
@@ -19,7 +19,12 @@ files prior to creating their containers.  Some questions may not be
 immediately familiar to users, but all questions should be answered by
 the information provided below or in JupyterHub's official [documentation](https://jupyterhub.readthedocs.io)
 
-*Note*: This software was developed and tested in an Ubuntu 16.04 
+*Note*: The installation from start to finish will take considerable time 
+to complete.  This is due to the need to download and/or create several 
+containers (some of which are nearly 10 GB in size), as well as downloading 
+and installing the [MIMIC II](https://physionet.org/mimic2/) database.
+
+*Note, Part 2*: This software was developed and tested in an Ubuntu 16.04 
 environment.  While I believe all commands contained within the 
 initialize.sh bash script should work on most Linux distributions, it is 
 possible that there are some syntax differences between OSes.  Just be 
