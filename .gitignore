@@ -6,3 +6,5 @@ userlist
 images/proxy/nginx.conf
 images/proxy/ssl/*
 get-docker.sh
+docker-compose.yml
+images/proxy/nginx.conf
