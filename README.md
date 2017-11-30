@@ -23,6 +23,9 @@ the information provided below or in JupyterHub's official [documentation](https
 to complete.  This is due to the need to download and/or create several 
 containers (some of which are nearly 10 GB in size), as well as downloading 
 and installing the [MIMIC II](https://physionet.org/mimic2/) database.
+All told, on a test machine this ended up requiring ~24 gigabytes of disk 
+space prior to the addition of any user data.  This is on top of what the 
+operating system requires.  Plan accordingly.
 
 *Note, Part 2*: This software was developed and tested in an Ubuntu 16.04 
 environment.  While I believe all commands contained within the 
