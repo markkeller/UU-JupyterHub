@@ -26,7 +26,7 @@ possible that there are some syntax differences between OSes.  Just be
 aware, and if you run into problems feel free to file an issue or email 
 me at <mark.keller@utah.edu> 
 
-
+---
 
 **[Technical Overview](#technical-overview)** |
 **[Prerequisites](#prerequisites)** |
