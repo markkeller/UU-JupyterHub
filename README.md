@@ -1,3 +1,33 @@
+# UU-JupyterHub
+This repository is a fork of [jupyterhub-deploy-docker](https://github.com/jupyterhub/jupyterhub-deploy-docker) for use at the 
+University of Utah. We have made customizations to include containers of 
+other popular data tools (MySQL, MongoDB, OrientDB, CoreNLP, Solr), web,
+and ssh servers for use in educating students in data science curriculum.
+
+This repository also includes a bash script (initialize.sh) which will help 
+users configure their deployment.  To use it, after cloning the repository 
+users simply need to change directories to UU-JupyterHub and execute the 
+following command:
+
+```bash
+./initialize.sh
+```
+
+It will then ask the users a series of questions about the environment 
+they are installing this software on and then update all configuration 
+files prior to creating their containers.  Some questions may not be 
+immediately familiar to users, but all questions should be answered by
+the information provided below or in JupyterHub's official [documentation](https://jupyterhub.readthedocs.io)
+
+*Note*: This software was developed and tested in an Ubuntu 16.04 
+environment.  While I believe all commands contained within the 
+initialize.sh bash script should work on most Linux distributions, it is 
+possible that there are some syntax differences between OSes.  Just be 
+aware, and if you run into problems feel free to file an issue or email 
+me at <mark.keller@utah.edu> 
+
+
+
 **[Technical Overview](#technical-overview)** |
 **[Prerequisites](#prerequisites)** |
 **[Authenticator setup](#authenticator-setup)** |
@@ -6,8 +36,6 @@
 **[Run JupyterHub](#run-jupyterhub)** |
 **[Behind the scenes](#behind-the-scenes)** |
 **[FAQ](#faq)**
-
-# UU-JupyterHub (forked from) jupyterhub-deploy-docker
 
 **jupyterhub-deploy-docker** provides a reference
 deployment of [JupyterHub](https://github.com/jupyter/jupyterhub), a
