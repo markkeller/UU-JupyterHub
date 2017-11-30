@@ -45,7 +45,7 @@ services:
     container_name: my_nlp
     mem_limit: 4G
   mysql:
-    image: uujupyterhub_mysql
+    image: mysql:latest
     container_name: my_mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${MYROOTPW}
